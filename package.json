@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "test:run": "vitest run",
     "build:webos": "vite build && node scripts/prepare-webos.mjs",
-    "package:webos": "npm run build:webos && ares-package dist",
+    "package:webos": "npm run build:webos && ares-package dist -o out",
     "install:webos": "ares-install *.ipk",
     "launch:webos": "ares-launch com.diskola.webos.player"
   },
