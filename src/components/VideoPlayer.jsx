@@ -1,0 +1,33 @@
+import { useRef } from 'react';
+import { useVideoPlayer } from '../hooks/useVideoPlayer.js';
+import './VideoPlayer.css';
+
+export default function VideoPlayer({ source, autoPlay = false }) {
+  const videoRef = useRef(null);
+  const { state, controls } = useVideoPlayer(videoRef, source);
+
+  return (
+    <div className="video-player" data-spotlight-container>
+      <video
+        ref={videoRef}
+        poster={source?.poster}
+        controls={false}
+        autoPlay={autoPlay}
+        tabIndex={0}
+      />
+      <div className="hud">
+        <div className="title">{source?.title}</div>
+        <div className="time">
+          {Math.floor(state.currentTime)} / {Math.floor(state.duration)}s
+        </div>
+      </div>
+      <div className="controls" data-spotlight-container>
+        <button onClick={() => controls.step(-10)}>&laquo; 10s</button>
+        <button onClick={controls.toggle}>{state.playing ? 'Pause' : 'Play'}</button>
+        <button onClick={() => controls.step(10)}>10s &raquo;</button>
+        <button onClick={() => controls.mute(!state.muted)}>{state.muted ? 'Unmute' : 'Mute'}</button>
+      </div>
+      {state.error && <div className="error">{state.error}</div>}
+    </div>
+  );
+}

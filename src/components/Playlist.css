@@ -1,0 +1,7 @@
+.playlist { padding: 8px; }
+.playlist ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.playlist li { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: center; padding: 8px; background: #121621; border-radius: 8px; }
+.playlist li.focused { outline: 2px solid #6ae3ff; }
+.playlist li img { width: 120px; height: 68px; object-fit: cover; border-radius: 4px; background: #1b2133; }
+.playlist .meta .title { font-weight: 600; }
+.playlist .meta .type { color: #a0a6b3; font-size: 12px; margin-top: 2px; }

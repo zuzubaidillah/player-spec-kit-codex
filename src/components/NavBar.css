@@ -1,0 +1,5 @@
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: #0e1320; border-bottom: 1px solid #242c3f; position: sticky; top: 0; z-index: 10; }
+.nav .left { display: flex; align-items: center; gap: 10px; }
+.nav .back { background: #121621; color: #e6e9ef; border: 1px solid #2a3146; border-radius: 6px; padding: 6px 10px; }
+.nav .back:focus { outline: 2px solid #6ae3ff; }
+.nav h2 { margin: 0; font-size: 18px; }
