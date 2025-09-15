@@ -5,6 +5,6 @@
   "type": "web",
   "main": "index.html",
   "title": "webOS Player",
-  "icon": "public/icon-192.png",
+  "icon": "icon-192.png",
   "bgColor": "#0b0d12"
 }
