@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Spotlight from '@enact/spotlight';
 import { NavBar, Playlist, VideoPlayer, LogViewer } from './components/index.js';
 import './styles.css';
+import { appendLog } from './lib/logStore.js';
 
 Spotlight.setPointerMode(false);
 
@@ -10,6 +11,8 @@ export default function App() {
   const [playlist, setPlaylist] = useState([]);
   const [selected, setSelected] = useState(null);
   const mainRef = useRef(null);
+  const lastViewRef = useRef('home');
+  const navStartRef = useRef(0);
 
   useEffect(() => {
     Spotlight.resume();
@@ -62,6 +65,20 @@ export default function App() {
       </div>
     );
   }, [view, playlist, selected]);
+
+  // Perf: measure transition time when view changes
+  useEffect(() => {
+    const from = lastViewRef.current;
+    const to = view;
+    navStartRef.current = performance.now();
+    // After next paint, measure duration
+    const id = requestAnimationFrame(() => {
+      const dur = performance.now() - navStartRef.current;
+      appendLog({ type: 'perf', detail: { event: 'transition', from, to, durationMs: Math.round(dur) } });
+    });
+    lastViewRef.current = to;
+    return () => cancelAnimationFrame(id);
+  }, [view]);
 
   // Global D-pad/back handling
   useEffect(() => {
