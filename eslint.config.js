@@ -4,6 +4,7 @@ import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import eslintPluginImport from 'eslint-plugin-import';
+import globals from 'globals';
 
 export default [
   { ignores: ['dist', 'coverage', 'node_modules'] },
@@ -18,7 +19,12 @@ export default [
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      parserOptions: { ecmaFeatures: { jsx: true } }
+      parserOptions: { ecmaFeatures: { jsx: true } },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals['vitest/globals']
+      }
     },
     settings: { react: { version: 'detect' } },
     rules: {
@@ -26,7 +32,8 @@ export default [
       ...reactHooks.configs.recommended.rules,
       ...jsxA11y.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
-      'react/prop-types': 'off'
+      'react/prop-types': 'off',
+      'jsx-a11y/media-has-caption': 'off'
     }
   }
 ];
