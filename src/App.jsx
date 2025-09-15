@@ -47,20 +47,20 @@ export default function App() {
   const content = useMemo(() => {
     if (view === 'player' && selected) {
       return (
-        <div className="page" ref={mainRef} data-page="player">
+        <div className="page" ref={mainRef} data-page="player" data-spotlight-container data-spotlight-id="page-player">
           <VideoPlayer source={selected} autoPlay />
         </div>
       );
     }
     if (view === 'logs') {
       return (
-        <div className="page" ref={mainRef} data-page="logs">
+        <div className="page" ref={mainRef} data-page="logs" data-spotlight-container data-spotlight-id="page-logs">
           <LogViewer />
         </div>
       );
     }
     return (
-      <div className="page" ref={mainRef} data-page="home">
+      <div className="page" ref={mainRef} data-page="home" data-spotlight-container data-spotlight-id="page-home">
         <Playlist items={playlist} onSelect={(item) => { setSelected(item); setView('player'); }} />
       </div>
     );
@@ -78,6 +78,12 @@ export default function App() {
     });
     lastViewRef.current = to;
     return () => cancelAnimationFrame(id);
+  }, [view]);
+
+  // Spotlight: focus the current page container
+  useEffect(() => {
+    const pageId = view === 'home' ? 'page-home' : view === 'player' ? 'page-player' : 'page-logs';
+    try { Spotlight.focus(pageId); } catch {}
   }, [view]);
 
   // Global D-pad/back handling
