@@ -63,6 +63,24 @@ export default function App() {
     );
   }, [view, playlist, selected]);
 
+  // Global D-pad/back handling
+  useEffect(() => {
+    const onKey = (e) => {
+      // Map webOS remotes (Back/Escape) to back navigation
+      if (e.key === 'Escape' || e.key === 'Backspace') {
+        if (view === 'player') {
+          setView('home');
+          e.preventDefault();
+        } else if (view === 'logs') {
+          setView(selected ? 'player' : 'home');
+          e.preventDefault();
+        }
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [view, selected]);
+
   return (
     <div className="app" data-spotlight-container data-spotlight-id="app-root">
       {header}
