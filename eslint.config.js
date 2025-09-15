@@ -23,7 +23,9 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
-        ...globals['vitest/globals']
+        ...globals.vitest,
+        describe: 'readonly', it: 'readonly', test: 'readonly', expect: 'readonly',
+        beforeEach: 'readonly', afterEach: 'readonly'
       }
     },
     settings: { react: { version: 'detect' } },
@@ -33,7 +35,8 @@ export default [
       ...jsxA11y.configs.recommended.rules,
       'react/react-in-jsx-scope': 'off',
       'react/prop-types': 'off',
-      'jsx-a11y/media-has-caption': 'off'
+      'jsx-a11y/media-has-caption': 'off',
+      'no-empty': ['error', { allowEmptyCatch: true }]
     }
   }
 ];
