@@ -1,5 +1,7 @@
 // Polyfills for older web engines commonly found on signage devices
 import 'whatwg-fetch';
+// Broad polyfills for very old engines
+try { require('core-js/stable'); } catch {}
 // regenerator-runtime is injected by vite legacy plugin when needed for async/await
 
 // Minimal runtime error overlay (visible on device without inspector)
@@ -16,4 +18,21 @@ try {
   };
   window.addEventListener('error', (e) => showError(e?.message || 'Script error'));
   window.addEventListener('unhandledrejection', (e) => showError(e?.reason?.message || 'Promise rejection'));
+} catch {}
+
+// requestAnimationFrame polyfill
+try {
+  (function() {
+    let last = 0;
+    const raf = window.requestAnimationFrame || function(cb){
+      const now = Date.now();
+      const next = Math.max(0, 16 - (now - last));
+      const id = setTimeout(function(){ cb(now + next); }, next);
+      last = now + next;
+      return id;
+    };
+    const caf = window.cancelAnimationFrame || function(id){ clearTimeout(id); };
+    window.requestAnimationFrame = raf;
+    window.cancelAnimationFrame = caf;
+  })();
 } catch {}
