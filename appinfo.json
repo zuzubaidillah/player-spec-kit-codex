@@ -1,0 +1,10 @@
+{
+  "id": "com.diskola.webos.player",
+  "version": "0.1.0",
+  "vendor": "Diskola",
+  "type": "web",
+  "main": "index.html",
+  "title": "webOS Player",
+  "icon": "public/icon-192.png",
+  "bgColor": "#0b0d12"
+}
