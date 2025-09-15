@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useVideoPlayer } from '../hooks/useVideoPlayer.js';
 import './VideoPlayer.css';
 
-export default function VideoPlayer({ source, autoPlay = false, onEnded }) {
+export default function VideoPlayer({ source, autoPlay = false, onEnded, showPoster = true }) {
   const videoRef = useRef(null);
   const { state, controls } = useVideoPlayer(videoRef, source);
 
@@ -10,7 +10,7 @@ export default function VideoPlayer({ source, autoPlay = false, onEnded }) {
     <div className="video-player" data-spotlight-container>
       <video
         ref={videoRef}
-        poster={source?.poster}
+        poster={showPoster ? source?.poster : undefined}
         controls={false}
         autoPlay={autoPlay}
         tabIndex={0}

@@ -13,6 +13,7 @@ export default function App() {
   const mainRef = useRef(null);
   const lastViewRef = useRef('home');
   const navStartRef = useRef(0);
+  const autoStartedRef = useRef(false);
 
   useEffect(() => {
     Spotlight.resume();
@@ -24,7 +25,14 @@ export default function App() {
       try {
         const res = await fetch('/playlist.json');
         const data = await res.json();
-        if (!cancelled) setPlaylist(data.items || []);
+        if (!cancelled) {
+          const items = data.items || [];
+          setPlaylist(items);
+          if (!autoStartedRef.current && items.length > 0) {
+            autoStartedRef.current = true;
+            setView('slideshow');
+          }
+        }
       } catch (e) {
         console.error('Failed to load playlist', e);
       }
@@ -41,17 +49,7 @@ export default function App() {
       case 'slideshow':
         return <NavBar title="Slideshow" onBack={() => setView('home')} right={<button onClick={() => setView('logs')}>Logs</button>} />;
       default:
-        return (
-          <NavBar
-            title="webOS Player"
-            right={
-              <>
-                <button onClick={() => setView('slideshow')}>Start Slideshow</button>
-                <button onClick={() => setView('logs')}>Logs</button>
-              </>
-            }
-          />
-        );
+        return <NavBar title="webOS Player" right={<button onClick={() => setView('logs')}>Logs</button>} />;
     }
   }, [view, selected]);
 
@@ -100,7 +98,11 @@ export default function App() {
 
   // Spotlight: focus the current page container
   useEffect(() => {
-    const pageId = view === 'home' ? 'page-home' : view === 'player' ? 'page-player' : 'page-logs';
+    const pageId =
+      view === 'home' ? 'page-home' :
+      view === 'player' ? 'page-player' :
+      view === 'slideshow' ? 'slideshow-stage' :
+      'page-logs';
     try { Spotlight.focus(pageId); } catch {}
   }, [view]);
 

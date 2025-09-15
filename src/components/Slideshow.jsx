@@ -68,13 +68,13 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
   }
 
   return (
-    <div className="slideshow" ref={containerRef} tabIndex={0} data-spotlight-container>
+    <div className="slideshow" ref={containerRef} tabIndex={0} data-spotlight-container data-spotlight-id="slideshow-stage">
       <div className="stage">
         {isImage && (
           <img className="slide" src={item.src || item.poster} alt={item.title || 'slide'} />
         )}
         {isVideo && (
-          <VideoPlayer source={item} autoPlay onEnded={next} />
+          <VideoPlayer source={item} autoPlay onEnded={next} showPoster={false} />
         )}
       </div>
       <div className="overlay">
@@ -93,4 +93,3 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
     </div>
   );
 }
-
