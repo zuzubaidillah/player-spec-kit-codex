@@ -4,10 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>webOS Player</title>
-    <link rel="icon" href="/favicon.ico" />
-      <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="favicon.ico" />
+    <link rel="manifest" href="appinfo.json" />
   </head>
   <body>
+    <div id="boot-fallback" style="position:fixed;inset:0;display:grid;place-items:center;background:#000;color:#e6e9ef;font:16px/1.4 -apple-system,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;z-index:9999;">
+      <div>
+        <div style="text-align:center;margin-bottom:8px;opacity:.8">Loading signage app…</div>
+        <div style="font-size:12px;color:#a0a6b3;text-align:center">If this message persists, the JS runtime may be incompatible.</div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

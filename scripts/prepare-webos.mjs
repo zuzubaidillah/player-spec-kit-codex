@@ -24,3 +24,28 @@ const missing = required.filter((f) => !fs.existsSync(path.join(dist, f)));
 if (missing.length) {
   console.warn('Warning: some expected files missing in dist:', missing);
 }
+
+// Remove modern ESM script tags that cause ares-package minifier issues
+try {
+  const htmlPath = path.join(dist, 'index.html');
+  let html = fs.readFileSync(htmlPath, 'utf8');
+  const before = html;
+  // Remove <script type="module" ...></script>
+  html = html.replace(/<script[^>]*type=["']module["'][^>]*><\/script>\s*/gi, '');
+  if (before !== html) {
+    fs.writeFileSync(htmlPath, html);
+    console.log('Removed module scripts from dist/index.html (legacy-only runtime).');
+  }
+  // Remove modern JS bundles to avoid ares-package minifier parsing errors
+  const assets = path.join(dist, 'assets');
+  if (fs.existsSync(assets)) {
+    for (const f of fs.readdirSync(assets)) {
+      if (f.endsWith('.js') && !f.includes('legacy')) {
+        fs.rmSync(path.join(assets, f), { force: true });
+        console.log('Removed modern bundle:', f);
+      }
+    }
+  }
+} catch (e) {
+  console.warn('HTML post-process failed:', e?.message || e);
+}

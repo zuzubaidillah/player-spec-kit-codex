@@ -81,6 +81,7 @@ function writeIcon(path, size, rgba) {
 const out192 = new URL('../public/icon-192.png', import.meta.url);
 const out512 = new URL('../public/icon-512.png', import.meta.url);
 const favico = new URL('../public/favicon.ico', import.meta.url);
+const slideLocal = new URL('../public/slide-offline.png', import.meta.url);
 
 // Primary color: #0b0d12 (matching app bg)
 writeIcon(out192, 192, [0x0b, 0x0d, 0x12, 0xff]);
@@ -89,3 +90,5 @@ writeIcon(out512, 512, [0x0b, 0x0d, 0x12, 0xff]);
 // Favicon 32x32 (same color); use .ico extension but PNG content works in most browsers when referenced as favicon
 writeIcon(favico, 32, [0x0b, 0x0d, 0x12, 0xff]);
 
+// Local offline slide 1280x720
+writeIcon(slideLocal, 1280, [0x12, 0x16, 0x24, 0xff]);

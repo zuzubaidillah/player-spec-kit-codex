@@ -1,10 +1,12 @@
 {
-  "id": "com.diskola.webos.player",
-  "version": "0.1.0",
-  "vendor": "Diskola",
+  "id": "com.lg.app.signage",
+  "version": "1.0.1",
+  "vendor": "Getface",
   "type": "web",
   "main": "index.html",
-  "title": "webOS Player",
+  "title": "player spec kit codex",
+  "appDescription": "player spec kit codex",
   "icon": "icon-192.png",
-  "bgColor": "#0b0d12"
+  "bgColor": "#0b0d12",
+  "uiRevision": 2
 }
