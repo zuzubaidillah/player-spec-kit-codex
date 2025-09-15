@@ -26,7 +26,6 @@ export default function App() {
         const data = await res.json();
         if (!cancelled) setPlaylist(data.items || []);
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error('Failed to load playlist', e);
       }
     })();

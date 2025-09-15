@@ -28,7 +28,6 @@ export function useVideoPlayer(videoRef, source) {
 
   const log = useCallback((type, detail) => {
     appendLog({ type, detail });
-    // eslint-disable-next-line no-console
     console[type === 'error' ? 'error' : 'log']('[Video]', type, detail);
   }, []);
 
