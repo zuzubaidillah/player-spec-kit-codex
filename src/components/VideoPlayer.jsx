@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { useVideoPlayer } from '../hooks/useVideoPlayer.js';
 import './VideoPlayer.css';
 
-export default function VideoPlayer({ source, autoPlay = false }) {
+export default function VideoPlayer({ source, autoPlay = false, onEnded }) {
   const videoRef = useRef(null);
   const { state, controls } = useVideoPlayer(videoRef, source);
 
@@ -14,6 +14,7 @@ export default function VideoPlayer({ source, autoPlay = false }) {
         controls={false}
         autoPlay={autoPlay}
         tabIndex={0}
+        onEnded={onEnded}
       />
       <div className="hud">
         <div className="title">{source?.title}</div>

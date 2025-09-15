@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Spotlight from '@enact/spotlight';
-import { NavBar, Playlist, VideoPlayer, LogViewer } from './components/index.js';
+import { NavBar, Playlist, VideoPlayer, LogViewer, Slideshow } from './components/index.js';
 import './styles.css';
 import { appendLog } from './lib/logStore.js';
 
 Spotlight.setPointerMode(false);
 
 export default function App() {
-  const [view, setView] = useState('home'); // 'home' | 'player' | 'logs'
+  const [view, setView] = useState('home'); // 'home' | 'player' | 'logs' | 'slideshow'
   const [playlist, setPlaylist] = useState([]);
   const [selected, setSelected] = useState(null);
   const mainRef = useRef(null);
@@ -38,8 +38,20 @@ export default function App() {
         return <NavBar title={selected?.title || 'Player'} onBack={() => setView('home')} right={<button onClick={() => setView('logs')}>Logs</button>} />;
       case 'logs':
         return <NavBar title="Logs" onBack={() => setView(selected ? 'player' : 'home')} />;
+      case 'slideshow':
+        return <NavBar title="Slideshow" onBack={() => setView('home')} right={<button onClick={() => setView('logs')}>Logs</button>} />;
       default:
-        return <NavBar title="webOS Player" right={<button onClick={() => setView('logs')}>Logs</button>} />;
+        return (
+          <NavBar
+            title="webOS Player"
+            right={
+              <>
+                <button onClick={() => setView('slideshow')}>Start Slideshow</button>
+                <button onClick={() => setView('logs')}>Logs</button>
+              </>
+            }
+          />
+        );
     }
   }, [view, selected]);
 
@@ -55,6 +67,13 @@ export default function App() {
       return (
         <div className="page" ref={mainRef} data-page="logs" data-spotlight-container data-spotlight-id="page-logs">
           <LogViewer />
+        </div>
+      );
+    }
+    if (view === 'slideshow') {
+      return (
+        <div className="page" ref={mainRef} data-page="slideshow" data-spotlight-container data-spotlight-id="page-slideshow">
+          <Slideshow items={playlist} onExit={() => setView('home')} />
         </div>
       );
     }

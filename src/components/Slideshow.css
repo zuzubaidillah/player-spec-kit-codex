@@ -1,0 +1,15 @@
+.slideshow { position: relative; height: 60vh; background: #000; border-radius: 8px; overflow: hidden; display: grid; }
+.slideshow:focus { outline: 2px solid #6ae3ff; }
+.slideshow .stage { width: 100%; height: 100%; }
+.slideshow .slide { width: 100%; height: 100%; object-fit: cover; display: block; }
+.slideshow .overlay {
+  position: absolute; left: 12px; right: 12px; bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 6px;
+}
+.slideshow .overlay .title { font-weight: 600; }
+.slideshow .overlay .meta { color: #c4c9d4; font-size: 12px; }
+.slideshow .overlay .controls { display: flex; gap: 8px; }
+.slideshow .overlay .controls button { background: #121621; color: #e6e9ef; border: 1px solid #2a3146; border-radius: 6px; padding: 6px 10px; }
+.slideshow .empty { display: grid; place-items: center; height: 100%; color: #a0a6b3; }
+
