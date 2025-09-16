@@ -7,12 +7,14 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
   const [paused, setPaused] = useState(false);
   const [imgError, setImgError] = useState(false);
   const timerRef = useRef(null);
+  const videoRef = useRef(null);
+  const stallRef = useRef({ last: 0, timer: null, maxTimer: null });
   const containerRef = useRef(null);
 
   const item = items[index];
   const type = (item?.type || '').toLowerCase();
-  const isImage = !!item && type.startsWith('image/');
-  const isVideo = !!item && type.startsWith('video/');
+  const isImage = !!item && (type.startsWith('image/') || type === 'image' || type === 'image/*');
+  const isVideo = !!item && (type.startsWith('video/') || type === 'video' || type === 'video/*' || type === 'application/vnd.apple.mpegurl');
   const isText  = !!item && (type.startsWith('text/') || item.kind === 'text');
   const fitMode = (item?.fit || 'cover'); // 'cover' | 'contain'
   const [textContent, setTextContent] = useState('');
@@ -50,6 +52,40 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
     }
     return () => clearTimer();
   }, [index, isImage, isText, durationMs, paused, next, clearTimer]);
+
+  // Video stall watchdog and max duration safety
+  useEffect(() => {
+    // clear previous
+    const s = stallRef.current;
+    if (s.timer) { clearInterval(s.timer); s.timer = null; }
+    if (s.maxTimer) { clearTimeout(s.maxTimer); s.maxTimer = null; }
+    s.last = 0;
+
+    if (!isVideo || paused) return;
+
+    const v = videoRef.current;
+    if (!v) return;
+
+    const tick = () => {
+      try {
+        const t = v.currentTime || 0;
+        if (t > s.last) {
+          s.last = t;
+        } else {
+          // no progress; if stuck >8s, skip
+          if (!s._since) s._since = Date.now();
+          if (Date.now() - s._since > 8000) next();
+        }
+      } catch {}
+    };
+    s.timer = setInterval(tick, 2000);
+    s.maxTimer = setTimeout(() => next(), 10 * 60 * 1000); // 10 minutes safeguard
+    return () => {
+      if (s.timer) { clearInterval(s.timer); s.timer = null; }
+      if (s.maxTimer) { clearTimeout(s.maxTimer); s.maxTimer = null; }
+      s._since = 0;
+    };
+  }, [index, isVideo, paused, next]);
 
   // Load text content if needed
   useEffect(() => {
@@ -120,7 +156,7 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
           />
         )}
         {isVideo && (
-          <VideoPlayer source={item} autoPlay onEnded={next} showPoster={false} fill />
+          <VideoPlayer key={item.src} videoRef={videoRef} source={item} autoPlay onEnded={next} showPoster={false} fill />
         )}
       </div>
       <div className="overlay">

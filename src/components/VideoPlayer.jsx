@@ -2,8 +2,9 @@ import { useRef } from 'react';
 import { useVideoPlayer } from '../hooks/useVideoPlayer.js';
 import './VideoPlayer.css';
 
-export default function VideoPlayer({ source, autoPlay = false, onEnded, showPoster = true, fill = false }) {
-  const videoRef = useRef(null);
+export default function VideoPlayer({ source, autoPlay = false, onEnded, showPoster = true, fill = false, videoRef: externalRef }) {
+  const internalRef = useRef(null);
+  const videoRef = externalRef || internalRef;
   const { state, controls } = useVideoPlayer(videoRef, source);
 
   return (

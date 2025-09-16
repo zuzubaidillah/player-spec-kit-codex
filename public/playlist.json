@@ -1,15 +1,4 @@
 {
   "version": 1,
-  "items": [
-    {
-      "id": "local-slide",
-      "title": "Local Slide",
-      "src": "slide-offline.png",
-      "type": "image/png",
-      "duration": 5
-    },
-    { "id": "slide-01", "title": "Slide 01", "src": "slide-01.png", "type": "image/png", "duration": 6 },
-    { "id": "slide-02", "title": "Slide 02", "src": "slide-02.png", "type": "image/png", "duration": 7 },
-    { "id": "slide-03", "title": "Slide 03", "src": "slide-03.png", "type": "image/png", "duration": 5 }
-  ]
+  "items": []
 }

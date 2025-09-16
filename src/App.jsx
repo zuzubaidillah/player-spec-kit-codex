@@ -6,12 +6,39 @@ import { appendLog } from './lib/logStore.js';
 
 Spotlight.setPointerMode(false);
 
-const DEFAULT_PLAYLIST = [
-  { id: 'local-slide', title: 'Local Slide', src: 'slide-offline.png', type: 'image/png', duration: 5 },
-  { id: 'slide-01', title: 'Slide 01', src: 'slide-01.png', type: 'image/png', duration: 6 },
-  { id: 'slide-02', title: 'Slide 02', src: 'slide-02.png', type: 'image/png', duration: 7 },
-  { id: 'slide-03', title: 'Slide 03', src: 'slide-03.png', type: 'image/png', duration: 5 }
-];
+const DEFAULT_PLAYLIST = [];
+
+function guessTypeFromUrl(u) {
+  const url = String(u || '').toLowerCase();
+  if (url.endsWith('.m3u8')) return 'application/vnd.apple.mpegurl';
+  if (/(\.mp4|\.webm|\.ogg)(\?|#|$)/.test(url)) return 'video/mp4';
+  if (/(\.jpg|\.jpeg)(\?|#|$)/.test(url)) return 'image/jpeg';
+  if (/(\.png)(\?|#|$)/.test(url)) return 'image/png';
+  if (/(\.gif)(\?|#|$)/.test(url)) return 'image/gif';
+  if (/(\.webp)(\?|#|$)/.test(url)) return 'image/webp';
+  return '';
+}
+
+function normalizeDidapor(items) {
+  const base = 'https://didapor.id/';
+  const arr = Array.isArray(items?.data) ? items.data : (Array.isArray(items) ? items : []);
+  return arr.map((it, i) => {
+    const raw = it?.src || it?.url || it?.path || it?.media_url || it?.image || it?.video || it?.poster || '';
+    const src = raw ? (new URL(raw, base)).toString() : '';
+    let type = String(it?.type || '').toLowerCase();
+    if (!type) type = guessTypeFromUrl(src);
+    if (type === 'image') type = 'image/*';
+    if (type === 'video') type = 'video/*';
+    const poster = it?.poster || it?.thumbnail || '';
+    const title = String(it?.title || it?.name || it?.caption || src.split('/').pop() || `Item ${i+1}`);
+    const out = { id: it?.id || `didapor-${i}`, title, src, type };
+    if (poster) out.poster = (new URL(poster, base)).toString();
+    const dur = Number(it?.duration || it?.durationSec || (it?.durationMs ? it.durationMs/1000 : 0) || 0);
+    if (Number.isFinite(dur) && dur > 0) out.duration = dur;
+    if (it?.fit) out.fit = it.fit;
+    return out;
+  }).filter(x => x.src);
+}
 
 function guessTypeFromUrl(u) {
   const url = String(u || '').toLowerCase();
@@ -62,6 +89,22 @@ export default function App() {
 
   useEffect(() => {
     Spotlight.resume();
+  }, []);
+
+  // Fetch remote playlist (didapor) and drive slideshow strictly from it
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetch('https://didapor.id/api/playlist', { cache: 'no-store' });
+        const j = await r.json();
+        const mapped = normalizeDidapor(j);
+        if (!cancelled && mapped.length) setPlaylist(mapped);
+      } catch (e) {
+        console.error('Failed to load remote playlist', e);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
