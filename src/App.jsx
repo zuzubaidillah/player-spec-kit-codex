@@ -10,10 +10,14 @@ const USE_LOCAL = true; // local slideshow mode
 const LOCAL_DURATION_SEC = 7; // default per-slide duration
 // Define your local playlist explicitly (no scanning, no API)
 const DEFAULT_PLAYLIST = [
+  { id: 'slide-008', title: 'slide-008', src: 'slide-008.jpg', type: 'image/png', duration: LOCAL_DURATION_SEC },
   { id: 'slide-001', title: 'slide-001', src: 'slide-001.png', type: 'image/png', duration: LOCAL_DURATION_SEC },
   { id: 'slide-002', title: 'slide-002', src: 'slide-002.mp4', type: 'video/mp4' },
   { id: 'slide-003', title: 'slide-003', src: 'slide-003.png', type: 'image/png', duration: LOCAL_DURATION_SEC },
-  { id: 'slide-004', title: 'slide-004', src: 'slide-004.png', type: 'image/png', duration: LOCAL_DURATION_SEC }
+  { id: 'slide-007', title: 'slide-007', src: 'slide-007.mp4', type: 'video/mp4' },
+  { id: 'slide-004', title: 'slide-004', src: 'slide-004.png', type: 'image/png', duration: LOCAL_DURATION_SEC },
+  { id: 'slide-006', title: 'slide-006', src: 'slide-006.png', type: 'image/png', duration: LOCAL_DURATION_SEC },
+  { id: 'slide-005', title: 'slide-005', src: 'slide-005.mp4', type: 'video/mp4' },
 ];
 
 function guessTypeFromUrl(u) {

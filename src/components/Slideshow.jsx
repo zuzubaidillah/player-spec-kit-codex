@@ -169,6 +169,7 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
             showPoster={false}
             fill
             objectFit="contain"
+            startWithSound={true}
           />
         )}
       </div>
