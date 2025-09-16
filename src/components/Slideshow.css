@@ -1,4 +1,4 @@
-.slideshow { position: relative; height: 60vh; background: #000; border-radius: 8px; overflow: hidden; }
+.slideshow { position: relative; height: 100vh; background: #000; overflow: hidden; }
 .slideshow:focus { outline: 2px solid #6ae3ff; }
 .slideshow .stage { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; background: #000 center/cover no-repeat; }
 .slideshow .slide { width: 100%; height: 100%; display: block; }
@@ -11,6 +11,9 @@
   background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 6px;
   z-index: 1;
 }
+.slideshow .overlay-bottom { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 16px; z-index: 2; }
+.slideshow .overlay-bottom .info { display: inline-flex; gap: 8px; align-items: center; background: rgba(0,0,0,0.4); padding: 6px 10px; border-radius: 6px; font-size: 14px; color: #e6e9ef; }
+.slideshow .overlay-bottom .sep { opacity: .6; }
 .slideshow .overlay .title { font-weight: 600; }
 .slideshow .overlay .meta { color: #c4c9d4; font-size: 12px; }
 .slideshow .overlay .controls { display: flex; gap: 8px; }

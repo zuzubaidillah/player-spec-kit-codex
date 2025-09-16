@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import VideoPlayer from './VideoPlayer.jsx';
 import './Slideshow.css';
 
-export default function Slideshow({ items = [], startIndex = 0, defaultDuration = 5000, onExit }) {
+export default function Slideshow({ items = [], startIndex = 0, defaultDuration = 5000, onExit, kiosk = true }) {
   const [index, setIndex] = useState(() => Math.min(Math.max(0, startIndex), Math.max(0, items.length - 1)));
   const [paused, setPaused] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [imgDims, setImgDims] = useState({w: 0, h: 0});
   const timerRef = useRef(null);
   const videoRef = useRef(null);
   const stallRef = useRef({ last: 0, timer: null, maxTimer: null });
@@ -16,7 +17,7 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
   const isImage = !!item && (type.startsWith('image/') || type === 'image' || type === 'image/*');
   const isVideo = !!item && (type.startsWith('video/') || type === 'video' || type === 'video/*' || type === 'application/vnd.apple.mpegurl');
   const isText  = !!item && (type.startsWith('text/') || item.kind === 'text');
-  const fitMode = (item?.fit || 'cover'); // 'cover' | 'contain'
+  const fitMode = (item?.fit || 'contain'); // 'cover' | 'contain'
   const [textContent, setTextContent] = useState('');
 
   const durationMs = useMemo(() => {
@@ -137,10 +138,12 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
   const stageStyle = useMemo(() => {
     if (isImage) {
       const url = item?.src || item?.poster;
-      return url ? { backgroundImage: `url(${url})`, backgroundSize: fitMode === 'contain' ? 'contain' : 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : {};
+      const isPortrait = imgDims.h > imgDims.w && imgDims.h > 0;
+      const size = fitMode === 'contain' ? 'contain' : (isPortrait ? 'contain' : 'cover');
+      return url ? { backgroundImage: `url(${url})`, backgroundSize: size, backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : {};
     }
     return {};
-  }, [isImage, fitMode, item]);
+  }, [isImage, fitMode, item, imgDims]);
 
   return (
     <div className="slideshow" ref={containerRef} tabIndex={0} data-spotlight-container data-spotlight-id="slideshow-stage">
@@ -152,27 +155,48 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
             src={item.src || item.poster}
             alt={item.title || 'slide'}
             onError={() => setImgError(true)}
+            onLoad={(e) => { try { const im=e.currentTarget; setImgDims({w: im.naturalWidth||0, h: im.naturalHeight||0}); } catch {} }}
             style={{ opacity: 0, position: 'absolute', width: 1, height: 1, pointerEvents: 'none' }}
           />
         )}
         {isVideo && (
-          <VideoPlayer key={item.src} videoRef={videoRef} source={item} autoPlay onEnded={next} showPoster={false} fill />
+          <VideoPlayer
+            key={item.src}
+            videoRef={videoRef}
+            source={item}
+            autoPlay
+            onEnded={next}
+            showPoster={false}
+            fill
+            objectFit="contain"
+          />
         )}
       </div>
-      <div className="overlay">
-        <div className="title">{imgError ? 'Image failed to load' : (item.title || '')}</div>
-        <div className="meta">
-          <span>{index + 1}/{items.length}</span>
-          {isImage && <span> • {Math.round(durationMs / 1000)}s</span>}
-          {isText && <span> • {Math.round(durationMs / 1000)}s</span>}
-          {paused && <span> • Paused</span>}
+      {!kiosk && (
+        <div className="overlay">
+          <div className="title">{imgError ? 'Image failed to load' : (item.title || '')}</div>
+          <div className="meta">
+            <span>{index + 1}/{items.length}</span>
+            {isImage && <span> • {Math.round(durationMs / 1000)}s</span>}
+            {isText && <span> • {Math.round(durationMs / 1000)}s</span>}
+            {paused && <span> • Paused</span>}
+          </div>
+          <div className="controls">
+            <button onClick={prev}>&laquo; Prev</button>
+            <button onClick={() => setPaused((p) => !p)}>{paused ? 'Resume' : 'Pause'}</button>
+            <button onClick={next}>Next &raquo;</button>
+          </div>
         </div>
-        <div className="controls">
-          <button onClick={prev}>&laquo; Prev</button>
-          <button onClick={() => setPaused((p) => !p)}>{paused ? 'Resume' : 'Pause'}</button>
-          <button onClick={next}>Next &raquo;</button>
+      )}
+      {kiosk && (
+        <div className="overlay-bottom">
+          <div className="info">
+            <span className="name">{item?.title || ''}</span>
+            <span className="sep">•</span>
+            <span className="pos">{index + 1}/{items.length}</span>
+          </div>
         </div>
-      </div>
+      )}
       {isText && (
         <div className="text-stage" aria-label="text-slide">
           {textContent ? (

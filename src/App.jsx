@@ -8,7 +8,13 @@ Spotlight.setPointerMode(false);
 
 const USE_LOCAL = true; // local slideshow mode
 const LOCAL_DURATION_SEC = 7; // default per-slide duration
-const DEFAULT_PLAYLIST = [];
+// Define your local playlist explicitly (no scanning, no API)
+const DEFAULT_PLAYLIST = [
+  { id: 'slide-001', title: 'slide-001', src: 'slide-001.png', type: 'image/png', duration: LOCAL_DURATION_SEC },
+  { id: 'slide-002', title: 'slide-002', src: 'slide-002.mp4', type: 'video/mp4' },
+  { id: 'slide-003', title: 'slide-003', src: 'slide-003.png', type: 'image/png', duration: LOCAL_DURATION_SEC },
+  { id: 'slide-004', title: 'slide-004', src: 'slide-004.png', type: 'image/png', duration: LOCAL_DURATION_SEC }
+];
 
 function guessTypeFromUrl(u) {
   const url = String(u || '').toLowerCase();
@@ -47,7 +53,7 @@ function normalizeDidapor(items) {
 export default function App() {
   const [view, setView] = useState('slideshow'); // 'slideshow' | 'logs'
   const [playlist, setPlaylist] = useState(DEFAULT_PLAYLIST);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
   const mainRef = useRef(null);
   const lastViewRef = useRef('home');
@@ -59,52 +65,13 @@ export default function App() {
     Spotlight.resume();
   }, []);
 
-  // Local slideshow discovery: scan for slide-00*.png (slide-001.png ...)
-  useEffect(() => {
-    if (!USE_LOCAL) return;
-    let cancelled = false;
-
-    const tryImg = (src) => new Promise((resolve) => {
-      const img = new Image();
-      let done = false;
-      const finish = (ok) => { if (!done) { done = true; resolve(ok); } };
-      img.onload = () => finish(true);
-      img.onerror = () => finish(false);
-      img.src = src + '?t=' + Date.now();
-      setTimeout(() => finish(false), 4000);
-    });
-
-    (async () => {
-      const found = [];
-      // Try slide-001..slide-050 with .png then .jpg
-      for (let i = 1; i <= 50; i++) {
-        const name = 'slide-' + String(i).padStart(3, '0');
-        const png = name + '.png';
-        const jpg = name + '.jpg';
-        // Prefer .png
-        // eslint-disable-next-line no-await-in-loop
-        const okPng = await tryImg(png);
-        if (okPng) {
-          found.push({ id: name, title: name, src: png, type: 'image/png', duration: LOCAL_DURATION_SEC });
-          continue;
-        }
-        // eslint-disable-next-line no-await-in-loop
-        const okJpg = await tryImg(jpg);
-        if (okJpg) found.push({ id: name, title: name, src: jpg, type: 'image/jpeg', duration: LOCAL_DURATION_SEC });
-      }
-      if (!cancelled) {
-        setPlaylist(found);
-        setLoading(false);
-        setLoadError(found.length ? '' : 'No local slides found (slide-00*.png|jpg)');
-      }
-    })();
-
-    return () => { cancelled = true; };
-  }, []);
+  // Local mode uses DEFAULT_PLAYLIST as-is. Ensure no accidental API loaders run.
 
   // (removed duplicate fetch effect; single remote fetch above drives playlist)
 
+  const KIOSK = true;
   const header = useMemo(() => {
+    if (KIOSK) return null;
     switch (view) {
       case 'logs':
         return <NavBar title="Logs" onBack={() => setView('slideshow')} />;
@@ -121,12 +88,15 @@ export default function App() {
         </div>
       );
     }
+
     return (
       <div className="page" ref={mainRef} data-page="slideshow" data-spotlight-container data-spotlight-id="page-slideshow">
         {loading ? (
-          <div style={{padding:12,opacity:.8}}>Loading local slides…</div>
+          <div style={{position:'absolute',left:0,right:0,bottom:0,padding:'10px 16px',zIndex:3}}>
+            <span style={{background:'rgba(0,0,0,.4)',padding:'6px 10px',borderRadius:6}}>Loading local slides…</span>
+          </div>
         ) : playlist && playlist.length ? (
-          <Slideshow items={playlist} onExit={() => setView('slideshow')} />
+          <Slideshow items={playlist} onExit={() => setView('slideshow')} kiosk />
         ) : (
           <div style={{padding:12,opacity:.8}}>No items. {loadError ? `(${loadError})` : ''}</div>
         )}

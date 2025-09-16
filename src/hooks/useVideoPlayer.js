@@ -99,6 +99,13 @@ export function useVideoPlayer(videoRef, source) {
     const video = videoRef?.current;
     if (!video) return;
     if (!source || !source.src) return;
+    // Skip setting src if external loader (e.g., hls.js) will manage the media source
+    if (source.type === 'application/vnd.apple.mpegurl') {
+      try {
+        const canNative = video.canPlayType && (video.canPlayType('application/vnd.apple.mpegurl') || video.canPlayType('application/x-mpegURL'));
+        if (!canNative) return; // let external loader attach (e.g., hls.js)
+      } catch {}
+    }
     try {
       video.pause();
       video.src = source.src;

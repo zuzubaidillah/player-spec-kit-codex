@@ -42,6 +42,24 @@ if (!fs.existsSync(icon512Src)) {
 fs.copyFileSync(icon512Src, icon512Dst);
 console.log('Copied icon-512.png into dist/.');
 
+// Copy slide-00*.{png,jpg,mp4} from project root into dist/
+try {
+  const names = fs.readdirSync(root);
+  const slideRegex = /^slide-00\d+\.(png|jpg|jpeg|mp4)$/i;
+  const picked = names.filter((n) => slideRegex.test(n));
+  for (const n of picked) {
+    const src = path.join(root, n);
+    const dst = path.join(dist, n);
+    fs.copyFileSync(src, dst);
+    console.log('Copied', n, 'into dist/.');
+  }
+  if (!picked.length) {
+    console.warn('No slide-00*.{png,jpg,mp4} files found at project root.');
+  }
+} catch (e) {
+  console.warn('Slide copy step failed:', e?.message || e);
+}
+
 // Minimal verification for required files (after copies)
 const required = ['index.html', 'manifest.json', 'icon-192.png'];
 const missing = required.filter((f) => !fs.existsSync(path.join(dist, f)));

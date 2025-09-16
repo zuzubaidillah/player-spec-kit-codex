@@ -1,8 +1,59 @@
-.video-player { position: relative; background: #000; border-radius: 8px; overflow: hidden; }
-.video-player video { width: 100%; height: 60vh; background: #000; display: block; }
-.video-player.fill video { height: 100%; }
-.video-player .hud { position: absolute; left: 12px; top: 12px; background: rgba(0,0,0,0.35); padding: 6px 10px; border-radius: 6px; font-size: 14px; }
-.video-player .controls { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 8px; }
-.video-player .controls button { background: #121621; color: #e6e9ef; border: 1px solid #2a3146; border-radius: 6px; padding: 8px 10px; }
-.video-player .controls button:focus { outline: 2px solid #6ae3ff; }
-.video-player .error { position: absolute; right: 12px; bottom: 12px; background: #3b0d0d; color: #ffb3b3; padding: 8px 10px; border-radius: 6px; }
+.video-player {
+    position: relative;
+    background: #000;
+    overflow: hidden;
+    border-radius: 0;
+    height: 100%;
+}
+
+.video-player video {
+    width: 100%;
+    height: 60vh;
+    background: #000;
+    display: block;
+}
+
+.video-player.fill video {
+    width: 100%;
+    height: 100%;
+}
+
+.video-player .hud {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.video-player .controls {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.video-player .controls button {
+    background: #121621;
+    color: #e6e9ef;
+    border: 1px solid #2a3146;
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+
+.video-player .controls button:focus {
+    outline: 2px solid #6ae3ff;
+}
+
+.video-player .error {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    background: #3b0d0d;
+    color: #ffb3b3;
+    padding: 8px 10px;
+    border-radius: 6px;
+}
