@@ -1,87 +1,64 @@
+# Implementation Plan: WebOS Signage Player (React/Vite)
 
-# templates/plan-template.md
-
-# Implementation Plan: WebOS Signage Slider (.ipk)
-
-**Branch**: `[001-webos-slider]` | **Date**: 2025-09-15 | **Spec**: `templates/spec-template.md`
+Spec: `templates/spec-template.md`
 
 ## Summary
 
-Implementasi aplikasi signage **.ipk** untuk **webOS** menggunakan **EnactJS** dengan **CSS murni** (tanpa framework CSS). Aplikasi memutar **slide teks(HTML), gambar, video** berdasarkan playlist (JSON lokal/URL), mendukung durasi per slide, loop, dan navigasi manual opsional.
+Player signage berbasis React 19 + Vite dengan dukungan fokus D‑pad (Enact Spotlight), pemutaran gambar dan video, fallback HLS via hls.js, logging ke localStorage, dan packaging `.ipk` untuk webOS.
 
-## Technical Context
+## Architecture
 
-* **Language/Version**: JavaScript (ES2022+)
-* **Primary Dependencies**: **EnactJS** (tanpa library UI pihak ketiga), API webOS runtime bila diperlukan (key input, storage)
-* **Styling**: **CSS murni** (BEM/utility ringan, tanpa framework)
-* **Storage**: File lokal untuk contoh playlist; opsional fetch dari URL \[butuh klarifikasi]
-* **Testing**: Unit (Jest), e2e smoke via emulator/perangkat
-* **Target Platform**: **LG webOS Signage** \[NEEDS CLARIFICATION: versi minimal]
-* **Performance Goals**: Transisi halus; video tanpa stutter
-* **Constraints**: Offline-friendly (opsional), penggunaan memori rendah
-* **Project Type**: Single (frontend-only)
+- Runtime: React + Vite (plugin-legacy → target ES2019)
+- Focus navigation: `@enact/spotlight`
+- Video: `<video>` + hook `useVideoPlayer` (observabilitas + kontrol)
+- Slideshow: `Slideshow.jsx` (auto-advance gambar; video advance via ended + watchdog)
+- Logging: `src/lib/logStore.js` + `LogViewer.jsx`
+- Packaging: `scripts/prepare-webos.mjs` + `ares-package` → `.ipk`
 
-## Project Structure (proposed)
+## Phases
 
-```
-src/
-  components/
-    Slider.js
-    SlideItem.js
-    SlideText.js
-    SlideImage.js
-    SlideVideo.js
-  hooks/
-    usePlaylist.js
-    useSlideTimer.js
-  styles/
-    main.css
-  App.js
-  index.js
-assets/
-  images/  videos/
-config/
-  playlist.json   # contoh playlist lokal
-webos/
-  appinfo.json   # manifest aplikasi webOS
-```
+1) Setup & Build
+   - Vite + React + plugin-legacy; ESLint/Prettier; Vitest.
+   - `appinfo.json` di root, ikon `icon-192.png` dan `icon-512.png`.
+   - PWA manifest di `public/manifest.json`.
 
-## Architecture & Design
+2) Playlist & Assets
+   - Default: `DEFAULT_PLAYLIST` di `src/App.jsx` menunjuk aset `slide-00X.*` di root project.
+   - `scripts/prepare-webos.mjs` menyalin `appinfo.json`, ikon, dan `slide-00X.*` ke `dist/` setelah build.
+   - Opsi lanjutan: loader `public/playlist.json` atau sumber remote.
 
-* **Slider** mengelola state indeks, timer, dan transisi.
-* **SlideItem** sebagai wrapper yang memilih renderer khusus.
-* **SlideText/Image/Video** merender tipe konten spesifik.
-* **usePlaylist** memuat dan memvalidasi playlist (lokal/URL).
-* **useSlideTimer** menangani durasi per slide + kontrol manual.
-* **CSS** fokus pada fullscreen layout, scaling (cover/contain), teks responsif.
+3) Komponen & Hooks
+   - `Slideshow.jsx`:
+     - Auto-advance gambar berdasarkan `duration` (detik) atau `defaultDuration`.
+     - Advance video pada `ended`; watchdog stall (>8s tanpa progress) + maksimum 10 menit.
+     - Kontrol D‑pad/keyboard: Left/Right, Space, Back/Escape.
+     - Kiosk overlay minimal (judul + posisi).
+   - `VideoPlayer.jsx`:
+     - Autoplay: coba dengan suara → fallback muted jika diblokir; overlay unmute.
+     - Integrasi `useVideoPlayer` untuk log/state (waiting, stalled, error, duration, time).
+     - HLS fallback via `hls.js` (inject CDN jika browser tidak native HLS).
+     - `object-fit` adaptif berdasar videoWidth/Height.
+   - `LogViewer.jsx` + `logStore.js`: tampilkan/bersihkan log `playerLogs`.
+   - `NavBar.jsx`: header opsional (kiosk menyembunyikan header).
 
-## Build & Packaging
+4) Observability & Perf
+   - Catat event transisi view (`perf`) dan semua event media penting.
 
-* Scaffold proyek menggunakan **Enact CLI**.
-* Build production bundle.
-* Buat **.ipk** dengan tooling webOS (contoh: `ares-package`) dan uji dengan `ares-launch` pada emulator/perangkat.
+5) Packaging & Delivery
+   - Build: `npm run build:webos` (Vite build + post-process + copy aset).
+   - Package: `npm run package:webos` → `.ipk` di `out/`.
+   - Install/Launch: `npm run install:webos`, `npm run launch:webos` (id: `com.lg.app.signage`).
 
-## Risks & Open Questions
+## Open Items / Next
 
-* \[NEEDS CLARIFICATION] **Sumber playlist utama** (lokal vs remote) & kebijakan **caching**.
-* \[NEEDS CLARIFICATION] **Versi minimal webOS** dan dukungan codec video.
-* \[NEEDS CLARIFICATION] Ketersediaan **kontrol remote** (key codes) vs touch.
+- Text slide (HTML) aman dengan sanitasi (belum aktif di UI saat ini).
+- Playlist eksternal via URL + fallback lokal saat offline.
+- Bundling lokal `hls.js` (hindari CDN) untuk lingkungan tanpa internet.
+- Test komprehensif untuk `Slideshow` dan `useVideoPlayer` (vitest + testing-library).
 
-## Phase 0: Research
+## Risks & Mitigations
 
-* Verifikasi dukungan codec video di webOS target.
-* Tentukan kebijakan sanitasi HTML.
-* Uji performa transisi & preloading pada perangkat nyata.
+- Autoplay bersuara diblokir: overlay unmute + set sistem audio via `luna://com.webos.audio` jika tersedia.
+- HLS tidak native: fallback `hls.js` (cek `Hls.isSupported()`).
+- Engine lama: plugin legacy + target `es2019` + polyfills (`whatwg-fetch`, `core-js`).
 
-## Phase 1: Design Outputs
-
-* `data-model.md`: Definisi `Slide` dan `Playlist` (konseptual)
-* `contracts/`: Skema playlist JSON (JSON Schema) + contoh
-* `quickstart.md`: Cara menjalankan di emulator & deploy ke perangkat
-
-## Phase 2 (for /tasks): Task Planning Approach
-
-* Generate tasks dari struktur di atas (tests → components → wiring → packaging).
-* Tandai \[P] untuk pekerjaan berbeda file yang independen.
-
-**STOP (sesuai /plan)**: Pembuatan `tasks.md` dilakukan oleh **/tasks**.

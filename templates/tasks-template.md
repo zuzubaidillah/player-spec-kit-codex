@@ -1,66 +1,55 @@
+# Tasks: WebOS Signage Player (React/Vite)
 
-# templates/tasks-template.md
+Input: `templates/plan-template.md`
+Prerequisites: Spec & Plan disepakati
 
-# Tasks: WebOS Signage Slider (.ipk)
+Format: `[ID] [P?] Deskripsi` — [P] = paralel (file berbeda, minim dependensi)
 
-**Input**: `templates/plan-template.md` + desain pendukung
-**Prerequisites**: Spec & Plan selesai
+## A — Alignment & Setup
 
-> Format: `[ID] [P?] Deskripsi` — **\[P]** = dapat dikerjakan paralel (file berbeda, tanpa dependensi)
+- [ ] T001 [P] Pastikan Vite + React + plugin-legacy terkonfigurasi (target `es2019`).
+- [ ] T002 [P] ESLint/Prettier konsisten; Vitest + Testing Library siap.
+- [ ] T003 [P] Validasi `appinfo.json` (id: `com.lg.app.signage`), ikon `icon-192.png`/`icon-512.png`.
+- [ ] T004 [P] Verifikasi skrip `scripts/prepare-webos.mjs` menyalin `slide-00X.*` ke `dist/`.
 
-## Phase 3.1 — Setup
+## B — Core Player
 
-* [ ] **T001** Buat proyek EnactJS (tanpa UI framework), inisialisasi repo
-* [ ] **T002 \[P]** Konfigurasi lint/format (ESLint, Prettier)
-* [ ] **T003 \[P]** Siapkan `webos/appinfo.json` minimal + ikon
-* [ ] **T004 \[P]** Tambahkan `config/playlist.json` contoh (campuran teks/gambar/video)
+- [ ] T010 Slideshow: auto-advance gambar (durasi per item), prev/next/pause/back via D‑pad.
+- [ ] T011 VideoPlayer: autoplay with sound → fallback muted + overlay unmute; set volume webOS (opsional).
+- [ ] T012 HLS fallback: injeksi `hls.js` hanya jika tidak native; bersihkan saat unmount.
+- [ ] T013 Watchdog: skip video jika stall >8s; hard cap 10 menit per item.
 
-## Phase 3.2 — Tests First (Smoke/Contract)
+## C — Observability & UX
 
-* [ ] **T005 \[P]** Unit test util: validasi object `Slide` (jenis, durasi ≥ 0)
-* [ ] **T006 \[P]** Unit test `useSlideTimer` (durasi, next/prev manual)
-* [ ] **T007 \[P]** Contract test skema playlist (JSON Schema)
+- [ ] T020 [P] Logging: event media (loadedmetadata/waiting/stalled/error) dan `perf` transition ke localStorage.
+- [ ] T021 [P] LogViewer: UI untuk lihat/clear log (`playerLogs`).
+- [ ] T022 [P] Kiosk overlay: tampilkan judul + posisi item; sembunyikan header di kiosk mode.
 
-## Phase 3.3 — Core Components
+## D — Playlist & Content
 
-* [ ] **T008** Implement `usePlaylist` (load lokal, validasi skema, error state)
-* [ ] **T009 \[P]** Implement `Slider` (state indeks, loop, integrasi timer)
-* [ ] **T010 \[P]** Implement `SlideItem` (switch by type, error fallback)
-* [ ] **T011 \[P]** Implement `SlideText` (render HTML aman, aturan sanitasi)
-* [ ] **T012 \[P]** Implement `SlideImage` (preload, cover/contain)
-* [ ] **T013 \[P]** Implement `SlideVideo` (autoplay, mute/unmute, end → next)
-* [ ] **T014** Wiring ke `App` + navigasi manual (remote key/touch) bila diaktifkan
+- [ ] T030 [P] Default playlist: `DEFAULT_PLAYLIST` menunjuk `slide-00X.*` (png/jpg/mp4) di root project.
+- [ ] T031 [P] Contoh `public/playlist.json` + dokumentasi struktur slide `{ id,title,src,type,duration?,poster?,fit? }`.
+- [ ] T032 Loader eksternal (opsional): muat dari URL dan normalisasi; fallback ke playlist lokal saat gagal.
 
-## Phase 3.4 — Styling (CSS murni)
+## E — Tests
 
-* [ ] **T015 \[P]** `styles/main.css`: fullscreen layout, alignment, fade transition
-* [ ] **T016 \[P]** Responsif teks HTML (clamp/fit), handling overflow
-* [ ] **T017 \[P]** State UI untuk error/loading (placeholder)
+- [ ] T040 [P] Unit `useVideoPlayer`: event/error/state dasar; mock `<video>`.
+- [ ] T041 Slideshow: advance gambar, panggil `onEnded` video → next; kontrol keyboard.
+- [ ] T042 E2E ringan (jsdom): render playlist campuran dan pastikan elemen muncul.
 
-## Phase 3.5 — Robustness & Observability
+## F — Packaging & Delivery
 
-* [ ] **T018 \[P]** Logging kesalahan pemuatan/pemutaran
-* [ ] **T019 \[P]** Fallback saat jaringan gagal (pakai playlist lokal terakhir)
-* [ ] **T020** Stress test loop 8 jam (monitor memori, stutter)
+- [ ] T050 Build: `npm run build:webos` dan validasi hasil `dist/` (ikon, appinfo, assets tersalin).
+- [ ] T051 Package: `npm run package:webos` → `.ipk` di `out/`.
+- [ ] T052 Deploy: install + launch pada emulator/perangkat; smoke test loop.
 
-## Phase 3.6 — Packaging & Delivery
+## G — Next (Opsional)
 
-* [ ] **T021** Build production bundle
-* [ ] **T022** Kemasi `.ipk` (tooling webOS)
-* [ ] **T023** Deploy ke emulator/perangkat, verifikasi end-to-end
-
-## Phase 3.7 — Polish
-
-* [ ] **T024 \[P]** Dokumentasi `quickstart.md` (run, deploy, update konten)
-* [ ] **T025 \[P]** Contoh playlist tambahan (berat/tinggi resolusi)
-* [ ] **T026** Audit aksesibilitas dasar (kontras, label) & watchdog freeze sederhana
+- [ ] T060 Text slide (HTML) + sanitasi (DOMPurify atau setara) + style responsif.
+- [ ] T061 Bundling lokal `hls.js` (hindari CDN) untuk lingkungan tanpa internet.
+- [ ] T062 Placeholder/error UI untuk gambar/video gagal.
 
 ## Dependencies
 
-* Tests (T005–T007) **sebelum** implementasi (T008+).
-* `Slider` (T009) bergantung pada `useSlideTimer` (T006) & `usePlaylist` (T008).
-* Packaging (T021–T023) setelah core stabil.
+- B setelah A; C/D/E paralel setelah B sebagian tersedia; F setelah build stabil.
 
-## After Tasks — Execution Hand-off
-
-Setelah daftar tugas dihasilkan, **minta agen** untuk **mengeksekusi berurutan** (TDD lebih dulu), menjaga batasan: **EnactJS + CSS murni**, target **webOS Signage**.

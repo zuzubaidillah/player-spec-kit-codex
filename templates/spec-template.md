@@ -1,64 +1,61 @@
 # templates/spec-template.md
 
-# Feature Specification: WebOS Signage Slider (.ipk)
+# Feature Specification: WebOS Signage Player (React/Vite)
 
-**Feature Branch**: `[001-webos-slider]`
-**Created**: 2025-09-15
-**Status**: Draft
-**Input**: User description: "/specify membuat aplikasi .ipk untuk operasi sistem webos signage, menampilkan sliders text(HTML), image, video"
+Status: Draft (disesuaikan dengan implementasi berjalan)
+Input: “Aplikasi .ipk webOS signage memutar gambar dan video berulang.”
 
 ---
 
 ## Primary User Story
 
-Sebagai **operator signage** atau **admin konten**, saya dapat menampilkan **serangkaian slide** berisi **teks (HTML)**, **gambar**, dan **video** pada perangkat **LG webOS Signage**, sehingga informasi dan promosi dapat diputar **berulang (loop)** sesuai urutan dan **durasi** yang ditentukan.
+Sebagai operator signage, saya dapat menampilkan serangkaian slide berisi gambar dan video pada perangkat LG webOS Signage sehingga informasi dapat berputar berulang sesuai urutan dan durasi yang ditentukan.
+
+Catatan: Dukungan teks (HTML) belum diaktifkan di aplikasi saat ini dan menjadi kandidat lanjutan.
 
 ## Acceptance Scenarios
 
-1. **Given** perangkat menyala dan aplikasi terbuka, **When** playlist berisi campuran teks/gambar/video dimuat, **Then** setiap slide tampil sesuai urutan dan **berpindah otomatis** setelah durasinya berakhir.
-2. **Given** slide bertipe **teks (HTML)**, **When** HTML yang valid diberikan (tanpa script berbahaya), **Then** teks dirender dengan benar dan menyesuaikan ukuran layar.
-3. **Given** slide bertipe **gambar**, **When** URL/asset gambar tersedia, **Then** gambar ditampilkan **penuh layar** (tanpa distorsi) dengan opsi **contain/cover** sesuai konfigurasi slide.
-4. **Given** slide bertipe **video**, **When** file/stream video dapat diputar di perangkat, **Then** video diputar otomatis dengan **mute/unmute** sesuai konfigurasi dan kembali ke slide berikutnya saat selesai.
-5. **Given** playlist memuat **durasi per slide**, **When** nilai berbeda ditetapkan, **Then** setiap slide menghormati durasi masing-masing (kecuali video yang default ke durasi asli bila tidak ditentukan).
-6. **Given** koneksi jaringan terputus, **When** konten lokal tersedia, **Then** pemutaran tetap berjalan menggunakan aset **cache/lokal** sesuai kebijakan caching.
-7. **Given** operator menekan tombol **Next/Prev** (remote/touch bila ada), **When** kontrol manual diizinkan, **Then** aplikasi berpindah slide secara manual tanpa mengganggu loop berikutnya.
+1) Given aplikasi terbuka, When playlist berisi campuran gambar/video dimuat, Then setiap item tampil sesuai urutan dan berpindah otomatis (gambar via durasi, video via selesai/ended).
+2) Given item bertipe gambar, When aset tersedia, Then gambar tampil layar penuh tanpa distorsi dengan opsi contain/cover otomatis (portrait → contain, landscape → cover).
+3) Given item bertipe video, When file/stream didukung, Then video autoplay; jika autoplay dengan suara diblokir, player jatuh ke mode muted dan menampilkan overlay untuk unmute dengan satu gestur (Enter/OK/pointer).
+4) Given durasi khusus per gambar, When durasi diisi, Then gambar menghormati durasi tersebut; video default mengikuti durasi media.
+5) Given kendala jaringan, When aset lokal tersedia, Then player tetap berjalan menggunakan aset lokal yang sudah dibundel.
+6) Given kendala codec/format, When pemutaran gagal, Then error dicatat di log dan player melanjutkan item berikutnya.
 
 ## Edge Cases
 
-* URL konten tidak dapat diakses / **HTTP error**.
-* **Format/codec** video tidak didukung.
-* Gambar beresolusi sangat besar → **downscale** diperlukan.
-* HTML terlalu panjang → overflow/scroll vs auto-fit.
-* **Kehabisan memori** saat preloading banyak media.
-* **Loss of network** saat update playlist (fallback ke versi terakhir).
+- URL tidak dapat diakses/timeout atau 404.
+- Codec video tidak didukung; HLS (m3u8) butuh fallback di non-Safari/non-native.
+- Gambar ekstrem (resolusi sangat besar) → waktu decode lama.
+- Autoplay with sound diblokir sampai ada user gesture.
+- Stalled buffering/bitrate drop selama streaming.
 
-## Functional Requirements
+## Functional Requirements (selaras implementasi)
 
-* **FR-001**: Sistem **MUST** menampilkan slide **teks (HTML), gambar, video**.
-* **FR-002**: Sistem **MUST** menjalankan **loop** berkelanjutan atas seluruh slide.
-* **FR-003**: Sistem **MUST** menghormati **durasi per slide** (override opsional untuk video).
-* **FR-004**: Sistem **MUST** mendukung **urutan** slide dari playlist.
-* **FR-005**: Sistem **MUST** mendukung **navigasi manual** (Next/Prev) bila diaktifkan.
-* **FR-006**: Sistem **MUST** memuat konten dari **konfigurasi** (file JSON lokal atau endpoint URL) \[NEEDS CLARIFICATION: sumber utama konten].
-* **FR-007**: Sistem **MUST** menampilkan **fallback** (placeholder) ketika media gagal dimuat.
-* **FR-008**: Sistem **MUST** melakukan **validasi HTML** agar aman (no inline script berbahaya) \[NEEDS CLARIFICATION: kebijakan sanitasi].
-* **FR-009**: Sistem **MUST** mendukung **skala tampilan** (cover/contain) untuk gambar/video.
-* **FR-010**: Sistem **MUST** mencatat **log kesalahan** pemuatan/pemutaran media.
+- FR-001: Player MUST memutar gambar dan video dalam loop.
+- FR-002: Gambar auto-advance berdasarkan durasi; video advance pada event ended atau watchdog (maks 10 menit atau stall >8s).
+- FR-003: Object-fit gambar/video: contain/cover adaptif; opsi per-item `fit` bila tersedia.
+- FR-004: Navigasi manual dengan remote/keyboard: Left/Right (Prev/Next), Space (Pause/Resume), Back/Escape (keluar/ kembali view).
+- FR-005: Logging MUST mencatat event media (loadedmetadata, waiting, stalled, error) ke localStorage (`playerLogs`) dan dapat ditinjau via Log Viewer.
+- FR-006: Sumber playlist default: daftar lokal terdefinisi di kode (`DEFAULT_PLAYLIST` di `src/App.jsx`) dengan aset `slide-00X.*` di root project; disalin ke `dist/` oleh skrip build.
+- FR-007: Optional: HLS fallback menggunakan `hls.js` jika tidak didukung native.
+- FR-008 (TODO): Dukungan teks (HTML) aman (sanitasi) sebelum diaktifkan produksi.
 
 ## Non-Functional Requirements
 
-* **NFR-001**: **Startup < 5 detik** pada perangkat target \[NEEDS CLARIFICATION: versi minimal webOS].
-* **NFR-002**: **Smooth** transisi antar slide (target 60 FPS untuk transisi sederhana).
-* **NFR-003**: **Stabil** dalam pemutaran panjang (8–12 jam nonstop).
-* **NFR-004**: Penggunaan memori **terkendali** dan tidak bocor saat loop.
+- NFR-001: Target engine lama via Vite Legacy (ES2019) agar kompatibel dengan webOS browser engine umum.
+- NFR-002: Transisi view ringan; pengukuran performa navigasi dicatat sebagai log `perf` (durasi ms) untuk observabilitas.
+- NFR-003: Stabil untuk pemutaran panjang (8–12 jam) tanpa kebocoran memori.
 
-## Key Entities (konseptual)
+## Entities (operasional)
 
-* **Slide**: `type ∈ {text_html, image, video}`, `content` (string/URL), `duration`, `fitMode` (cover/contain), `mute` (video), `poster` (video opsional).
-* **Playlist**: `items: Slide[]`, `loop: boolean`, `allowManualNav: boolean`.
+- Slide: `{ id, title, src, type, duration?, poster?, fit? }` dengan `type ∈ { image/*, video/*, application/vnd.apple.mpegurl, (text/html - TODO) }` dan `duration` dalam detik untuk gambar.
+- Playlist: `items: Slide[]` dalam urutan tampil.
 
 ## Review & Acceptance Checklist
 
-* [ ] Tidak ada detail implementasi (teknologi, framework) dalam dokumen ini.
-* [ ] Semua kebutuhan ditulis dalam bahasa bisnis dan dapat diuji.
-* [ ] Semua **\[NEEDS CLARIFICATION]** telah didaftarkan untuk ditindaklanjuti.
+- [ ] Gambar dan video berputar sesuai urutan dengan auto-advance tepat.
+- [ ] Overlay unmute muncul saat autoplay bersuara diblokir; satu gestur mengaktifkan suara dan mencoba set sistem audio webOS.
+- [ ] Log kesalahan/kejadian media tercatat dan dapat ditinjau di Log Viewer.
+- [ ] Build dan packaging `.ipk` berjalan menggunakan skrip yang tersedia.
+- [ ] Catatan: Dukungan teks (HTML) ditandai sebagai TODO sebelum produksi.
