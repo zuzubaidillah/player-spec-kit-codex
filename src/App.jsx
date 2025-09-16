@@ -40,44 +40,7 @@ function normalizeDidapor(items) {
   }).filter(x => x.src);
 }
 
-function guessTypeFromUrl(u) {
-  const url = String(u || '').toLowerCase();
-  if (url.endsWith('.m3u8')) return 'application/vnd.apple.mpegurl';
-  if (/(\.mp4|\.webm|\.ogg)(\?|#|$)/.test(url)) return 'video/mp4';
-  if (/(\.jpg|\.jpeg)(\?|#|$)/.test(url)) return 'image/jpeg';
-  if (/(\.png)(\?|#|$)/.test(url)) return 'image/png';
-  if (/(\.gif)(\?|#|$)/.test(url)) return 'image/gif';
-  if (/(\.webp)(\?|#|$)/.test(url)) return 'image/webp';
-  return '';
-}
-
-function absolutize(base, src) {
-  try { return new URL(src, base).toString(); } catch { return src; }
-}
-
-function normalizeDidaporPayload(payload) {
-  const list = Array.isArray(payload) ? payload : (Array.isArray(payload?.data) ? payload.data : []);
-  const base = 'https://didapor.id/';
-  const out = [];
-  for (let i = 0; i < list.length; i++) {
-    const it = list[i] || {};
-    const rawSrc = it.src || it.url || it.path || it.media_url || it.image || it.video || it.poster || '';
-    if (!rawSrc) continue;
-    const src = absolutize(base, rawSrc);
-    const title = it.title || it.name || it.caption || `Item ${i + 1}`;
-    let type = (it.type || '').toLowerCase();
-    if (!type) type = guessTypeFromUrl(src);
-    const poster = it.poster || it.thumbnail || '';
-    let duration = Number(it.duration || it.durationSec || (it.durationMs ? it.durationMs / 1000 : 0) || 0);
-    if (!Number.isFinite(duration) || duration < 0) duration = 0;
-    const item = { id: it.id || `didapor-${i}`, title, src, type };
-    if (poster) item.poster = absolutize(base, poster);
-    if (duration) item.duration = duration;
-    if (it.fit) item.fit = it.fit;
-    out.push(item);
-  }
-  return out;
-}
+// (deduped helpers above)
 
 export default function App() {
   const [view, setView] = useState('slideshow'); // 'slideshow' | 'logs'
@@ -107,42 +70,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        // Try remote playlist from didapor first
-        let applied = false;
-        try {
-          const resRemote = await fetch('https://didapor.id/api/playlist', { cache: 'no-store' });
-          const dataRemote = await resRemote.json();
-          const itemsRemote = normalizeDidaporPayload(dataRemote);
-          if (!cancelled && itemsRemote.length) {
-            setPlaylist(itemsRemote.length > 1 ? itemsRemote : [...itemsRemote, ...DEFAULT_PLAYLIST]);
-            applied = true;
-          }
-        } catch {}
-
-        if (!applied) {
-          // Fallback to packaged playlist.json (if present)
-          try {
-            const res = await fetch('playlist.json', { cache: 'no-store' });
-            const data = await res.json();
-            if (!cancelled && Array.isArray(data.items)) {
-              if (data.items.length > 1) {
-                setPlaylist(data.items);
-              } else if (data.items.length === 1) {
-                setPlaylist([...data.items, ...DEFAULT_PLAYLIST]);
-              }
-            }
-          } catch {}
-        }
-      } catch (e) {
-        console.error('Failed to load playlist', e);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  // (removed duplicate fetch effect; single remote fetch above drives playlist)
 
   const header = useMemo(() => {
     switch (view) {
