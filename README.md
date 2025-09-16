@@ -24,4 +24,9 @@ A minimal media playlist player for webOS built with Enact Spotlight, React, and
 3. Navigate with arrow keys and Enter. ESC/Backspace navigates back.
 
 ## Packaging (webOS)
-Use `appinfo.json` at project root. After building (`npm run build`), copy `dist/` contents alongside `appinfo.json` for packaging with `ares-package`.
+- Build + prepare: `npm run build:webos`
+- Package to .ipk: `npm run package:webos` (outputs to `out/`)
+- Install to device: `npm run install:webos`
+- Launch on device: `npm run launch:webos` (app id: `com.lg.app.signage`)
+
+`appinfo.json` is at project root and is copied into `dist/` during `build:webos`.

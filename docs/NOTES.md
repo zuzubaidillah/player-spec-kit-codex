@@ -3,7 +3,7 @@
 Dokumen ini merangkum hasil implementasi T001–T014, temuan saat uji coba, serta kendala terkait media/codec dan performa transisi.
 
 ## Ringkasan Implementasi
-- T001–T004: Proyek Vite + React dengan Enact Spotlight, ESLint/Prettier, `appinfo.json` dan `public/manifest.json`, serta `public/playlist.json`.
+- T001–T004: Proyek Vite + React dengan Enact Spotlight, ESLint/Prettier, `appinfo.json` dan `public/appinfo.json`, serta `public/playlist.json`.
 - T005–T007: Konfigurasi Vitest + Testing Library, baseline test (`App`) dan TODO untuk komponen/hook.
 - T008–T014: Hook `useVideoPlayer` dan `useSpotlightNavigation`, komponen UI, wiring App + navigasi manual (D‑pad), dan logging performa transisi.
 

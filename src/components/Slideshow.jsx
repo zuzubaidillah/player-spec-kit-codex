@@ -10,8 +10,12 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
   const containerRef = useRef(null);
 
   const item = items[index];
-  const isImage = item && typeof item.type === 'string' && item.type.startsWith('image/');
-  const isVideo = item && typeof item.type === 'string' && item.type.startsWith('video/');
+  const type = (item?.type || '').toLowerCase();
+  const isImage = !!item && type.startsWith('image/');
+  const isVideo = !!item && type.startsWith('video/');
+  const isText  = !!item && (type.startsWith('text/') || item.kind === 'text');
+  const fitMode = (item?.fit || 'cover'); // 'cover' | 'contain'
+  const [textContent, setTextContent] = useState('');
 
   const durationMs = useMemo(() => {
     if (!item) return defaultDuration;
@@ -37,15 +41,40 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
     setIndex((i) => (i - 1 + items.length) % items.length);
   }, [items.length]);
 
-  // Auto-advance for images
+  // Auto-advance for images & text; videos advance via onEnded
   useEffect(() => {
     clearTimer();
     setImgError(false);
-    if (!paused && isImage && durationMs > 0) {
+    if (!paused && (isImage || isText) && durationMs > 0) {
       timerRef.current = setTimeout(() => next(), durationMs);
     }
     return () => clearTimer();
-  }, [index, isImage, durationMs, paused, next, clearTimer]);
+  }, [index, isImage, isText, durationMs, paused, next, clearTimer]);
+
+  // Load text content if needed
+  useEffect(() => {
+    if (!isText) { setTextContent(''); return; }
+    if (item?.text) { setTextContent(String(item.text)); return; }
+    if (item?.src && /^data:text\//i.test(item.src)) {
+      try {
+        const comma = item.src.indexOf(',');
+        const raw = item.src.slice(comma + 1);
+        setTextContent(decodeURIComponent(raw));
+      } catch { setTextContent(''); }
+      return;
+    }
+    if (item?.src) {
+      let cancelled = false;
+      (async () => {
+        try {
+          const res = await fetch(item.src);
+          const txt = await res.text();
+          if (!cancelled) setTextContent(txt);
+        } catch { if (!cancelled) setTextContent(''); }
+      })();
+      return () => { cancelled = true; };
+    }
+  }, [isText, item?.src, item?.text]);
 
   // Keyboard controls: left/right navigate, space toggles pause, back exits
   const onKeyDown = useCallback((e) => {
@@ -72,10 +101,10 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
   const stageStyle = useMemo(() => {
     if (isImage) {
       const url = item?.src || item?.poster;
-      return url ? { backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {};
+      return url ? { backgroundImage: `url(${url})`, backgroundSize: fitMode === 'contain' ? 'contain' : 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : {};
     }
     return {};
-  }, [isImage, item]);
+  }, [isImage, fitMode, item]);
 
   return (
     <div className="slideshow" ref={containerRef} tabIndex={0} data-spotlight-container data-spotlight-id="slideshow-stage">
@@ -99,6 +128,7 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
         <div className="meta">
           <span>{index + 1}/{items.length}</span>
           {isImage && <span> • {Math.round(durationMs / 1000)}s</span>}
+          {isText && <span> • {Math.round(durationMs / 1000)}s</span>}
           {paused && <span> • Paused</span>}
         </div>
         <div className="controls">
@@ -107,6 +137,15 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
           <button onClick={next}>Next &raquo;</button>
         </div>
       </div>
+      {isText && (
+        <div className="text-stage" aria-label="text-slide">
+          {textContent ? (
+            <div className="text-box">{textContent}</div>
+          ) : (
+            <div className="text-box muted">(empty text)</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

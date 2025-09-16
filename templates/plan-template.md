@@ -43,7 +43,7 @@ assets/
 config/
   playlist.json   # contoh playlist lokal
 webos/
-  manifest.json   # manifest aplikasi webOS
+  appinfo.json   # manifest aplikasi webOS
 ```
 
 ## Architecture & Design

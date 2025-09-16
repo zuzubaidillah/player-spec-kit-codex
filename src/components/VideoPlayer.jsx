@@ -14,6 +14,7 @@ export default function VideoPlayer({ source, autoPlay = false, onEnded, showPos
         controls={false}
         autoPlay={autoPlay}
         tabIndex={0}
+        muted
         onEnded={onEnded}
       />
       <div className="hud">

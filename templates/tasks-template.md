@@ -12,7 +12,7 @@
 
 * [ ] **T001** Buat proyek EnactJS (tanpa UI framework), inisialisasi repo
 * [ ] **T002 \[P]** Konfigurasi lint/format (ESLint, Prettier)
-* [ ] **T003 \[P]** Siapkan `webos/manifest.json` minimal + ikon
+* [ ] **T003 \[P]** Siapkan `webos/appinfo.json` minimal + ikon
 * [ ] **T004 \[P]** Tambahkan `config/playlist.json` contoh (campuran teks/gambar/video)
 
 ## Phase 3.2 — Tests First (Smoke/Contract)

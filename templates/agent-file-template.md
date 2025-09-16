@@ -38,7 +38,7 @@
 ## Output yang Diharapkan
 
 * Kode sumber dengan struktur sesuai Plan.
-* `webos/manifest.json`, contoh `config/playlist.json`.
+* `webos/appinfo.json`, contoh `config/playlist.json`.
 * Paket **.ipk** hasil build + instruksi pemasangan.
 * Catatan pengujian (durasi loop panjang, codec, jaringan).
 

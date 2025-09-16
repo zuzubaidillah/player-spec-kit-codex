@@ -8,26 +8,8 @@
       "type": "image/png",
       "duration": 5
     },
-    {
-      "id": "bbb",
-      "title": "Big Buck Bunny (MP4)",
-      "src": "https://cdn.dribbble.com/userupload/22966989/file/large-4faab4144624f8501a6d74f4acf17fb1.mp4",
-      "type": "video/mp4",
-      "poster": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg"
-    },
-    {
-      "id": "sintel",
-      "title": "Sintel (MP4)",
-      "src": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-      "type": "video/mp4",
-      "poster": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/Sintel.jpg"
-    },
-    {
-      "id": "slide3",
-      "title": "Slide: Tears of Steel Poster",
-      "src": "https://mango.blender.org/wp-content/uploads/2013/05/blog_rain.jpg",
-      "type": "image/jpeg",
-      "duration": 7
-    }
+    { "id": "slide-01", "title": "Slide 01", "src": "slide-01.png", "type": "image/png", "duration": 6 },
+    { "id": "slide-02", "title": "Slide 02", "src": "slide-02.png", "type": "image/png", "duration": 7 },
+    { "id": "slide-03", "title": "Slide 03", "src": "slide-03.png", "type": "image/png", "duration": 5 }
   ]
 }
