@@ -2,12 +2,12 @@ import { useRef } from 'react';
 import { useVideoPlayer } from '../hooks/useVideoPlayer.js';
 import './VideoPlayer.css';
 
-export default function VideoPlayer({ source, autoPlay = false, onEnded, showPoster = true }) {
+export default function VideoPlayer({ source, autoPlay = false, onEnded, showPoster = true, fill = false }) {
   const videoRef = useRef(null);
   const { state, controls } = useVideoPlayer(videoRef, source);
 
   return (
-    <div className="video-player" data-spotlight-container>
+    <div className={`video-player${fill ? ' fill' : ''}`} data-spotlight-container>
       <video
         ref={videoRef}
         poster={showPoster ? source?.poster : undefined}

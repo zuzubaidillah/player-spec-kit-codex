@@ -1,5 +1,6 @@
 :root { color-scheme: dark; }
 html, body, #root { height: 100%; margin: 0; }
 body { font-family: -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: #0b0d12; color: #e6e9ef; }
-.app { padding: 24px; }
+.app { padding: 24px; min-height: 100%; display: grid; gap: 16px; }
 :focus { outline: 2px solid #6ae3ff; outline-offset: 2px; }
+.page { position: relative; min-height: 60vh; }

@@ -5,6 +5,7 @@ import './Slideshow.css';
 export default function Slideshow({ items = [], startIndex = 0, defaultDuration = 5000, onExit }) {
   const [index, setIndex] = useState(() => Math.min(Math.max(0, startIndex), Math.max(0, items.length - 1)));
   const [paused, setPaused] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const timerRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -39,6 +40,7 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
   // Auto-advance for images
   useEffect(() => {
     clearTimer();
+    setImgError(false);
     if (!paused && isImage && durationMs > 0) {
       timerRef.current = setTimeout(() => next(), durationMs);
     }
@@ -67,18 +69,33 @@ export default function Slideshow({ items = [], startIndex = 0, defaultDuration 
     return <div className="slideshow" data-spotlight-container><div className="empty">No items</div></div>;
   }
 
+  const stageStyle = useMemo(() => {
+    if (isImage) {
+      const url = item?.src || item?.poster;
+      return url ? { backgroundImage: `url(${url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {};
+    }
+    return {};
+  }, [isImage, item]);
+
   return (
     <div className="slideshow" ref={containerRef} tabIndex={0} data-spotlight-container data-spotlight-id="slideshow-stage">
-      <div className="stage">
+      <div className="stage" style={stageStyle}>
         {isImage && (
-          <img className="slide" src={item.src || item.poster} alt={item.title || 'slide'} />
+          // keep an img element to detect load errors on engines that don't raise CSS background image errors
+          <img
+            className="slide"
+            src={item.src || item.poster}
+            alt={item.title || 'slide'}
+            onError={() => setImgError(true)}
+            style={{ opacity: 0, position: 'absolute', width: 1, height: 1, pointerEvents: 'none' }}
+          />
         )}
         {isVideo && (
-          <VideoPlayer source={item} autoPlay onEnded={next} showPoster={false} />
+          <VideoPlayer source={item} autoPlay onEnded={next} showPoster={false} fill />
         )}
       </div>
       <div className="overlay">
-        <div className="title">{item.title}</div>
+        <div className="title">{imgError ? 'Image failed to load' : (item.title || '')}</div>
         <div className="meta">
           <span>{index + 1}/{items.length}</span>
           {isImage && <span> • {Math.round(durationMs / 1000)}s</span>}
